@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import perl.aaron.TruthTrees.logic.Statement;
+import perl.aaron.TruthTrees.util.UserError;
 
 /**
  * A class that represents a Branch in a Truth Tree, containing a list of Decompositions
@@ -350,20 +351,11 @@ public class Branch {
 	 * branch terminations verified
 	 * @return True if the branch has a BranchTerminator that is verified
 	 */
-	public boolean verifyTerminations()
+	public void verifyTerminations() throws UserError
 	{
-		System.out.println("Branch - Lines Size: " + lines.size());
 		for (int i = lines.size() - 1; i >= 0; i--) // start from the end, since it should be the last line
-		{
-//			System.out.println("Branch - On Line: " + lines.get(i).toString());
-//			if (lines.get(i) instanceof BranchTerminator ) {
-//				System.out.println("Decomposed: " + ((BranchTerminator)(lines.get(i))).verifyDecomposition());
-//			}
-			if (lines.get(i) instanceof BranchTerminator &&
-					((BranchTerminator)(lines.get(i))).verifyDecomposition() == null)
-				return true;
-		}
-		return false;
+			if (lines.get(i) instanceof BranchTerminator)
+					lines.get(i).verifyDecomposition();
 	}
 	
 	/**
