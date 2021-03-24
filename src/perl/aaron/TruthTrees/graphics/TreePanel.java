@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -88,7 +89,7 @@ class RadioPanel extends JFrame {
 		int y = 200;
 		buttons = new ArrayList<>();
 
-		var itr = variables.iterator();
+		Iterator<String> itr = variables.iterator();
 		while (itr.hasNext()) {
 			JRadioButton button = new JRadioButton();
 			button.setText(itr.next().toString());
