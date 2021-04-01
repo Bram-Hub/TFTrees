@@ -18,6 +18,7 @@ import perl.aaron.TruthTrees.logic.Decomposable;
 import perl.aaron.TruthTrees.logic.Negation;
 import perl.aaron.TruthTrees.logic.Statement;
 import perl.aaron.TruthTrees.util.UserError;
+import perl.aaron.TruthTrees.logic.Conditional;
 
 /**
  * A class that represents a single line in a branch, used for storing and verifying decompositions
@@ -53,6 +54,11 @@ public class BranchLine {
 		if (statement != null)
 			return statement.toString();
 		return "";
+	}
+
+	public static void print(String words) {
+		System.console().printf(words);
+		System.console().printf("\n");
 	}
 	
 	public void setIsPremise(boolean isPremise)
@@ -126,14 +132,37 @@ public class BranchLine {
 		// also make sure decoposedFrom exists, i.e. not pulled from thin air
 		if(lax && decomposedFrom != null && selectedLines.isEmpty())
 			return;
-		
+
 		// Check if the statement is decomposable and it is not the negation of an atomic statement
 		if (statement == null)
 			return;
 		
-		if (decomposedFrom == null && !isPremise)
-			throw new UserError("Unexpected statement \"" + statement.toString() + "\" in tree");
-		
+		if (decomposedFrom == null && !isPremise) {
+			if (selectedLines.size() == 2) {
+				boolean hasConditional = false;
+				BranchLine conditionalLine = null;
+				BranchLine antecedent = null;
+				for (BranchLine line : selectedLines) {
+					if (line.getStatement() instanceof Conditional) {
+						if (conditionalLine != null) {
+							antecedent = line;
+						} else {
+							hasConditional = true;
+							conditionalLine = line;
+						}
+					} else {
+						antecedent = line;
+					}
+				}
+				if (hasConditional) {
+					Statement conditionalAntecedent = ((Conditional) conditionalLine.getStatement()).getAntecedent();
+					Statement conditionalConclusion = ((Conditional) conditionalLine.getStatement()).getConclusion();
+					if (conditionalAntecedent.equals(antecedent.getStatement()) && statement.equals(conditionalConclusion)) return;
+					else throw new UserError("Not a valid use of modus ponens");
+				} else throw new UserError("(need 1 conditional) Unexpected statement \"" + statement.toString() + "\" in tree");
+			} else throw new UserError("(Need 2 statements) Unexpected statement \"" + statement.toString() + "\" in tree");
+		}
+
 		if (statement instanceof Decomposable &&
 				!(statement instanceof Negation && (((Negation)statement).getNegand() instanceof AtomicStatement)))
 		{
