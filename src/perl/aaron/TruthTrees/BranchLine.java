@@ -155,12 +155,25 @@ public class BranchLine {
 					}
 				}
 				if (hasConditional) {
+					print(conditionalLine.getStatement().toString());
+					print(antecedent.getStatement().toString());
+
 					Statement conditionalAntecedent = ((Conditional) conditionalLine.getStatement()).getAntecedent();
 					Statement conditionalConclusion = ((Conditional) conditionalLine.getStatement()).getConclusion();
+
+
 					if (conditionalAntecedent.equals(antecedent.getStatement()) && statement.equals(conditionalConclusion)) return;
+
+					if (antecedent.getStatement() instanceof Conditional) {
+						conditionalAntecedent = ((Conditional) antecedent.getStatement()).getAntecedent();
+						conditionalConclusion = ((Conditional) antecedent.getStatement()).getConclusion();
+
+						if (conditionalAntecedent.equals(conditionalLine.getStatement()) && statement.equals(conditionalConclusion)) return;
+						else throw new UserError("Not a valid use of modus ponens");
+					}
 					else throw new UserError("Not a valid use of modus ponens");
-				} else throw new UserError("(need 1 conditional) Unexpected statement \"" + statement.toString() + "\" in tree");
-			} else throw new UserError("(Need 2 statements) Unexpected statement \"" + statement.toString() + "\" in tree");
+				} else throw new UserError("Unexpected statement \"" + statement.toString() + "\" in tree");
+			} else throw new UserError("Unexpected statement \"" + statement.toString() + "\" in tree");
 		}
 
 		if (statement instanceof Decomposable &&
