@@ -5,12 +5,9 @@ import java.util.Set;
 
 public class Conditional extends BinaryOperator {
 
-	private boolean modusPonens;
-
 	public Conditional(Statement a, Statement b)
 	{
 		super(a,b);
-		modusPonens = false;
 	}
 	public String toString() {
 		return  statements.get(0).toStringParen()+ " \u2192 " +statements.get(1).toStringParen();

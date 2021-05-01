@@ -546,7 +546,7 @@ public class TreePanel extends JPanel {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				selectedBranches.if_some(selectedBranches -> {
-					if (SwingUtilities.isRightMouseButton(e) || e.isControlDown()) {
+					if ((SwingUtilities.isRightMouseButton(e) || e.isControlDown()) && !e.isShiftDown()) {
 						try {
 							if (selectedBranches.contains(myBranch)) {
 								selectedBranches.remove(myBranch);
@@ -618,9 +618,31 @@ public class TreePanel extends JPanel {
 		}
 	}
 
+	private void toggleMP(BranchLine b, Set<BranchLine> curSelected) {
+		b.toggleModusPonens();
+		if (curSelected.contains(b)) {
+			curSelected.remove(b);
+			reverseLineMap.get(b).setBackground(BranchLine.DEFAULT_COLOR);
+		} else {
+			curSelected.add(b);
+			reverseLineMap.get(b).setBackground(BranchLine.MP_COLOR);
+		}
+	}
+
+
+
 	private void toggleSelected(BranchLine b) {
 		try {
 			toggleSelected(b, selectedLines.unwrap());
+		}
+		catch(NoneResult r) {
+			r.printStackTrace();
+		}
+	}
+
+	private void toggleMP(BranchLine b) {
+		try {
+			toggleMP(b, selectedLines.unwrap());
 		}
 		catch(NoneResult r) {
 			r.printStackTrace();
@@ -886,7 +908,18 @@ public class TreePanel extends JPanel {
 					selectedBranches.set(lineMap.get(newField).getSelectedBranches());
 					moveComponents();
 					repaint();
-				} else if (SwingUtilities.isRightMouseButton(e) || e.isControlDown()) {
+				} else if (e.isControlDown() && e.isShiftDown()) {
+					BranchLine curLine = lineMap.get(newField);
+					if (!isTerminator) {
+						editLine.if_some(editLine -> {
+							if (editLine != curLine && !(curLine instanceof BranchTerminator))
+								toggleMP(curLine);
+						});
+					} else {
+						((BranchTerminator) lineMap.get(newField)).switchIsClose();
+						newField.setText(lineMap.get(newField).toString());
+					}
+				} else if ((SwingUtilities.isRightMouseButton(e) || e.isControlDown()) && !e.isShiftDown()) {
 					BranchLine curLine = lineMap.get(newField);
 					if (!isTerminator) {
 						editLine.if_some(editLine -> {

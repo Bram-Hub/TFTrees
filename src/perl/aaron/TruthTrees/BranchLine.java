@@ -32,9 +32,11 @@ public class BranchLine {
 	protected Set<BranchLine> selectedLines;
 	protected BranchLine decomposedFrom;
 	protected boolean isPremise;
+	protected boolean usedForModusPonens;
 	public static final Color SELECTED_COLOR = new Color(0.3f,0.9f,0.9f);
 	public static final Color DEFAULT_COLOR = Color.LIGHT_GRAY;
 	public static final Color EDIT_COLOR = Color.GREEN;
+	public static final Color MP_COLOR = new Color(161, 23, 242);
   public boolean typing = false;
 	public String currentTyping;
 	public int decompNum;
@@ -47,6 +49,7 @@ public class BranchLine {
 		selectedLines = new LinkedHashSet<BranchLine>();
 		isPremise = false;
 		decompNum = -1;
+		usedForModusPonens = false;
 	}
 
 	public String toString()
@@ -103,6 +106,11 @@ public class BranchLine {
 	{
 		this.decomposedFrom = decomposedFrom;
 	}
+
+	public void toggleModusPonens()
+	{
+		this.usedForModusPonens = !this.usedForModusPonens;
+	}
 	
 	public BranchLine getDecomposedFrom()
 	{
@@ -135,6 +143,9 @@ public class BranchLine {
 
 		// Check if the statement is decomposable and it is not the negation of an atomic statement
 		if (statement == null)
+			return;
+
+		if (usedForModusPonens)
 			return;
 		
 		if (decomposedFrom == null && !isPremise) {
