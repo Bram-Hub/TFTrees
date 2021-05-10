@@ -114,8 +114,8 @@ public class FileManager {
 			ArrayList<Set<Integer>> lineDecompositions, ArrayList<Set<Integer>> branchDecompositions,
 			ArrayList<BranchLine> lines, ArrayList<Branch> branches)
 	{
-		var curLineDecompositions = new LinkedHashSet<Integer>();
-		var curBranchDecompositions = new LinkedHashSet<Integer>();
+		LinkedHashSet<Integer> curLineDecompositions = new LinkedHashSet<Integer>();
+		LinkedHashSet<Integer> curBranchDecompositions = new LinkedHashSet<Integer>();
 		Element curElement = (Element) node;
 		BranchLine newLine;
 		if (node.getNodeName().equals("Terminator"))

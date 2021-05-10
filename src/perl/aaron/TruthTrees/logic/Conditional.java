@@ -31,4 +31,12 @@ public class Conditional extends BinaryOperator {
 		return (statements.get(0).equals(otherStatements.get(0))) && (statements.get(1).equals(otherStatements.get(1)));
 	}
 
+	public Statement getAntecedent() {
+		return statements.get(0);
+	}
+
+	public Statement getConclusion() {
+		return statements.get(1);
+	}
+
 }

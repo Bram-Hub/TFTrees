@@ -82,7 +82,7 @@ public class BranchTerminator extends BranchLine {
 							if (!(neg.getNegand() instanceof Decomposable))
 								returnError = false;
 						}
-						if (curLine.getSelectedLines().size() == 0 && returnError)
+						if (curLine.getSelectedLines().size() == 0 && returnError && !curLine.getMP())
 							throw new UserError("There are statements in this branch that still need to be decomposed!");
 					}
 					else if (curLine.getStatement() != null)

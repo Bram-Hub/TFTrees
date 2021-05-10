@@ -5,3 +5,4 @@ bin/
 /grading/
 *.swp
 *.jar
+.idea/

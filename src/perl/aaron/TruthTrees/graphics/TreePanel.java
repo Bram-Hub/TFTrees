@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -88,7 +89,7 @@ class RadioPanel extends JFrame {
 		int y = 200;
 		buttons = new ArrayList<>();
 
-		var itr = variables.iterator();
+		Iterator<String> itr = variables.iterator();
 		while (itr.hasNext()) {
 			JRadioButton button = new JRadioButton();
 			button.setText(itr.next().toString());
@@ -545,7 +546,7 @@ public class TreePanel extends JPanel {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				selectedBranches.if_some(selectedBranches -> {
-					if (SwingUtilities.isRightMouseButton(e) || e.isControlDown()) {
+					if ((SwingUtilities.isRightMouseButton(e) || e.isControlDown()) && !e.isShiftDown()) {
 						try {
 							if (selectedBranches.contains(myBranch)) {
 								selectedBranches.remove(myBranch);
@@ -617,9 +618,38 @@ public class TreePanel extends JPanel {
 		}
 	}
 
+	/**
+	 * Toggles the color to/from purple for the Modus Ponens lines.
+	 */
+	private void toggleMP(BranchLine b, Set<BranchLine> curSelected) {
+		b.toggleModusPonens();
+		if (curSelected.contains(b)) {
+			curSelected.remove(b);
+			reverseLineMap.get(b).setBackground(BranchLine.DEFAULT_COLOR);
+		} else {
+			curSelected.add(b);
+			reverseLineMap.get(b).setBackground(BranchLine.MP_COLOR);
+		}
+	}
+
+
+
 	private void toggleSelected(BranchLine b) {
 		try {
 			toggleSelected(b, selectedLines.unwrap());
+		}
+		catch(NoneResult r) {
+			r.printStackTrace();
+		}
+	}
+
+	/**
+	 * Toggles the modus ponens variable for the branch line b.
+	 * @param b
+	 */
+	private void toggleMP(BranchLine b) {
+		try {
+			toggleMP(b, selectedLines.unwrap());
 		}
 		catch(NoneResult r) {
 			r.printStackTrace();
@@ -885,7 +915,24 @@ public class TreePanel extends JPanel {
 					selectedBranches.set(lineMap.get(newField).getSelectedBranches());
 					moveComponents();
 					repaint();
-				} else if (SwingUtilities.isRightMouseButton(e) || e.isControlDown()) {
+				/**
+				 * When SHIFT + CTRL clicking on a statement, it makes it the a support step
+				 * for a modus ponens shortcut, and sets the block to purple.
+				 */
+				} else if (e.isControlDown() && e.isShiftDown()) {
+					BranchLine curLine = lineMap.get(newField);
+					if (!isTerminator) {
+						editLine.if_some(editLine -> {
+							if (editLine != curLine && !(curLine instanceof BranchTerminator)) {
+								toggleMP(curLine);
+								repaint();
+							}
+						});
+					} else {
+						((BranchTerminator) lineMap.get(newField)).switchIsClose();
+						newField.setText(lineMap.get(newField).toString());
+					}
+				} else if ((SwingUtilities.isRightMouseButton(e) || e.isControlDown()) && !e.isShiftDown()) {
 					BranchLine curLine = lineMap.get(newField);
 					if (!isTerminator) {
 						editLine.if_some(editLine -> {

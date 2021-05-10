@@ -18,6 +18,7 @@ import perl.aaron.TruthTrees.logic.Decomposable;
 import perl.aaron.TruthTrees.logic.Negation;
 import perl.aaron.TruthTrees.logic.Statement;
 import perl.aaron.TruthTrees.util.UserError;
+import perl.aaron.TruthTrees.logic.Conditional;
 
 /**
  * A class that represents a single line in a branch, used for storing and verifying decompositions
@@ -31,10 +32,12 @@ public class BranchLine {
 	protected Set<BranchLine> selectedLines;
 	protected BranchLine decomposedFrom;
 	protected boolean isPremise;
+	protected boolean usedForModusPonens; // Flag says if the current statement was used as premise for Modus Ponens
 	public static final Color SELECTED_COLOR = new Color(0.3f,0.9f,0.9f);
 	public static final Color DEFAULT_COLOR = Color.LIGHT_GRAY;
 	public static final Color EDIT_COLOR = Color.GREEN;
-  public boolean typing = false;
+	public static final Color MP_COLOR = new Color(161, 23, 242);
+  	public boolean typing = false;
 	public String currentTyping;
 	public int decompNum;
 
@@ -46,6 +49,7 @@ public class BranchLine {
 		selectedLines = new LinkedHashSet<BranchLine>();
 		isPremise = false;
 		decompNum = -1;
+		usedForModusPonens = false;
 	}
 
 	public String toString()
@@ -54,6 +58,13 @@ public class BranchLine {
 			return statement.toString();
 		return "";
 	}
+
+	public static void print(String words) {
+		System.console().printf(words);
+		System.console().printf("\n");
+	}
+
+	public boolean getMP() { return usedForModusPonens; }
 	
 	public void setIsPremise(boolean isPremise)
 	{
@@ -97,6 +108,11 @@ public class BranchLine {
 	{
 		this.decomposedFrom = decomposedFrom;
 	}
+
+	public void toggleModusPonens()
+	{
+		this.usedForModusPonens = !this.usedForModusPonens;
+	}
 	
 	public BranchLine getDecomposedFrom()
 	{
@@ -126,14 +142,56 @@ public class BranchLine {
 		// also make sure decoposedFrom exists, i.e. not pulled from thin air
 		if(lax && decomposedFrom != null && selectedLines.isEmpty())
 			return;
-		
+
 		// Check if the statement is decomposable and it is not the negation of an atomic statement
 		if (statement == null)
 			return;
-		
-		if (decomposedFrom == null && !isPremise)
-			throw new UserError("Unexpected statement \"" + statement.toString() + "\" in tree");
-		
+
+		if (usedForModusPonens)
+			return;
+
+		/**
+		 * Verifies the selected statements follow the "Modus Ponens" logic shortcut
+		 */
+		if (decomposedFrom == null && !isPremise) {
+			if (selectedLines.size() == 2) {
+				boolean hasConditional = false;
+				BranchLine conditionalLine = null;
+				BranchLine antecedent = null;
+				for (BranchLine line : selectedLines) {
+					if (line.getStatement() instanceof Conditional) {
+						if (conditionalLine != null) {
+							antecedent = line;
+						} else {
+							hasConditional = true;
+							conditionalLine = line;
+						}
+					} else {
+						antecedent = line;
+					}
+				}
+				if (hasConditional) {
+					print(conditionalLine.getStatement().toString());
+					print(antecedent.getStatement().toString());
+
+					Statement conditionalAntecedent = ((Conditional) conditionalLine.getStatement()).getAntecedent();
+					Statement conditionalConclusion = ((Conditional) conditionalLine.getStatement()).getConclusion();
+
+
+					if (conditionalAntecedent.equals(antecedent.getStatement()) && statement.equals(conditionalConclusion)) return;
+
+					if (antecedent.getStatement() instanceof Conditional) {
+						conditionalAntecedent = ((Conditional) antecedent.getStatement()).getAntecedent();
+						conditionalConclusion = ((Conditional) antecedent.getStatement()).getConclusion();
+
+						if (conditionalAntecedent.equals(conditionalLine.getStatement()) && statement.equals(conditionalConclusion)) return;
+						else throw new UserError("Not a valid use of modus ponens");
+					}
+					else throw new UserError("Not a valid use of modus ponens");
+				} else throw new UserError("Unexpected statement \"" + statement.toString() + "\" in tree");
+			} else throw new UserError("Unexpected statement \"" + statement.toString() + "\" in tree");
+		}
+
 		if (statement instanceof Decomposable &&
 				!(statement instanceof Negation && (((Negation)statement).getNegand() instanceof AtomicStatement)))
 		{
