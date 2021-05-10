@@ -32,12 +32,12 @@ public class BranchLine {
 	protected Set<BranchLine> selectedLines;
 	protected BranchLine decomposedFrom;
 	protected boolean isPremise;
-	protected boolean usedForModusPonens;
+	protected boolean usedForModusPonens; // Flag says if the current statement was used as premise for Modus Ponens
 	public static final Color SELECTED_COLOR = new Color(0.3f,0.9f,0.9f);
 	public static final Color DEFAULT_COLOR = Color.LIGHT_GRAY;
 	public static final Color EDIT_COLOR = Color.GREEN;
 	public static final Color MP_COLOR = new Color(161, 23, 242);
-  public boolean typing = false;
+  	public boolean typing = false;
 	public String currentTyping;
 	public int decompNum;
 
@@ -63,6 +63,8 @@ public class BranchLine {
 		System.console().printf(words);
 		System.console().printf("\n");
 	}
+
+	public boolean getMP() { return usedForModusPonens; }
 	
 	public void setIsPremise(boolean isPremise)
 	{
@@ -147,7 +149,10 @@ public class BranchLine {
 
 		if (usedForModusPonens)
 			return;
-		
+
+		/**
+		 * Verifies the selected statements follow the "Modus Ponens" logic shortcut
+		 */
 		if (decomposedFrom == null && !isPremise) {
 			if (selectedLines.size() == 2) {
 				boolean hasConditional = false;

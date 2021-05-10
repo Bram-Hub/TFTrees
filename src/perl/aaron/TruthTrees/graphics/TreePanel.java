@@ -618,6 +618,9 @@ public class TreePanel extends JPanel {
 		}
 	}
 
+	/**
+	 * Toggles the color to/from purple for the Modus Ponens lines.
+	 */
 	private void toggleMP(BranchLine b, Set<BranchLine> curSelected) {
 		b.toggleModusPonens();
 		if (curSelected.contains(b)) {
@@ -640,6 +643,10 @@ public class TreePanel extends JPanel {
 		}
 	}
 
+	/**
+	 * Toggles the modus ponens variable for the branch line b.
+	 * @param b
+	 */
 	private void toggleMP(BranchLine b) {
 		try {
 			toggleMP(b, selectedLines.unwrap());
@@ -908,12 +915,18 @@ public class TreePanel extends JPanel {
 					selectedBranches.set(lineMap.get(newField).getSelectedBranches());
 					moveComponents();
 					repaint();
+				/**
+				 * When SHIFT + CTRL clicking on a statement, it makes it the a support step
+				 * for a modus ponens shortcut, and sets the block to purple.
+				 */
 				} else if (e.isControlDown() && e.isShiftDown()) {
 					BranchLine curLine = lineMap.get(newField);
 					if (!isTerminator) {
 						editLine.if_some(editLine -> {
-							if (editLine != curLine && !(curLine instanceof BranchTerminator))
+							if (editLine != curLine && !(curLine instanceof BranchTerminator)) {
 								toggleMP(curLine);
+								repaint();
+							}
 						});
 					} else {
 						((BranchTerminator) lineMap.get(newField)).switchIsClose();
