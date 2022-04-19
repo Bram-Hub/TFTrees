@@ -89,6 +89,27 @@ public class TruthTrees {
 			showMessage(msg, "Check Tree");
 		});
 
+
+		/////////////////////////////
+		// Check Syntax Button
+		/////////////////////////////
+
+		JMenuItem checkSyntaxButton = new JMenuItem("Check Syntax");
+
+		treeMenu.add(checkSyntaxButton);
+		checkSyntaxButton.setAccelerator(KeyStroke.getKeyStroke('I', InputEvent.CTRL_DOWN_MASK));
+		checkSyntaxButton.addActionListener( event -> {
+			// String msg;
+			try {
+				treePanel.checkSentences();
+				// msg = "The tree is correct!";
+			}
+			catch(UserError userError) {
+				// msg = "The tree is invalid!\n" + userError.getMessage();
+			}
+			// showMessage(msg, "Check Tree");
+		});
+
 		////////////////////////////
 		// Verify Line Button
 		////////////////////////////
@@ -201,6 +222,7 @@ public class TruthTrees {
 				showError(userError.getMessage());
 			}
 		});
+
 		
 		/////////////////////////////////////
 		// Tick Button
@@ -270,6 +292,7 @@ public class TruthTrees {
 			}
 		});
 		
+		
 		/////////////////////////////////////
 		// Delete Button
 		/////////////////////////////////////
@@ -279,6 +302,8 @@ public class TruthTrees {
 		treeMenu.add(deleteButton);
 		deleteButton.setAccelerator(KeyStroke.getKeyStroke('D', InputEvent.CTRL_DOWN_MASK));
 		deleteButton.addActionListener(event -> treePanel.deleteCurrentLine());
+		      
+
 		
 		//////////////////////////////////////
 		// Delete Branch Button

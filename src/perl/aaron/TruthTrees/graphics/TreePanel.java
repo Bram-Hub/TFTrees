@@ -462,6 +462,22 @@ public class TreePanel extends JPanel {
 		}
 	}
 
+	public void checkSentences() throws UserError {
+		int correct = 0;
+		for (Map.Entry<JTextField,BranchLine> entry :lineMap.entrySet()){
+			JTextField e = entry.getKey();
+			Statement newStatement = ExpressionParser.parseExpression(entry.getValue().toString());
+			if(newStatement == null){
+				e.setBackground(BranchLine.INVALID_COLOR);
+			} else {
+				correct ++;
+			} 
+		}
+		if(correct == lineMap.size()){
+			
+		}
+	}
+
 	/**
 	 * Checks the selected line.
 	 *
@@ -835,6 +851,26 @@ public class TreePanel extends JPanel {
 		addLine(LinePlacement.AFTER);
 	}
 	
+	private void addBranchAfter(final LinePlacement placement) throws UserError {
+		try {
+			final BranchLine editLine = this.editLine.unwrap();
+			BranchLine newLine = null;
+			// for (int i = 0; i < editLine.getParent().numLines(); i++) {
+			// 	if (editLine.getParent().getLine(i) == editLine) {
+			// 		newLine = editLine.getParent().addBranch(null, placement == LinePlacement.AFTER? i + 1: i);
+			// 		break;
+			// 	}
+			// }
+			// assert newLine != null : "Failed to find editLine";
+			// makeTextFieldForLine(newLine, editLine.getParent(), false);
+			addBranch(editLine.getParent());
+			moveComponents();
+		}
+		catch(NoneResult r) {
+			throw new UserError("No line selected.");
+		}		
+	}
+	
 	private void addLine(final LinePlacement placement) throws UserError {
 		try {
 			final BranchLine editLine = this.editLine.unwrap();
@@ -995,19 +1031,17 @@ public class TreePanel extends JPanel {
 					line.setStatement(newStatement);
 					b.calculateWidestLine();
 					newField.setText(newStatement.toString());
-				} else {
-					if (!newField.getText().equals("")) {
-						if (line.getStatement() != null)
-							newField.setText(line.toString());
-						else
-							newField.setText("");
-						JOptionPane.showMessageDialog(null, "Error: Invalid logical statement", "Error",
-								JOptionPane.ERROR_MESSAGE);
-					} else {
+				} 
+				// else {
+				// 	newField.setBackground(BranchLine.INVALID_COLOR);
+				// 	if (!newField.getText().equals("")) {
+				// 		JOptionPane.showMessageDialog(null, "Error: Invalid logical statement", "Error",
+				// 				JOptionPane.ERROR_MESSAGE);
+				// 	} else {
 
-						line.setStatement(null);
-					}
-				}
+				// 		line.setStatement(null);
+				// 	}
+				// }
 				moveComponents();
 			}
 
@@ -1108,7 +1142,7 @@ public class TreePanel extends JPanel {
 		g2d.fillRect(0, 0, getWidth(), getHeight());
 		g2d.setColor(new Color(0.0f, 0.0f, 0.0f));
 		g2d.setStroke(new BasicStroke(4.0f));
-		drawStringAt(g2d, new Point(center.x + getWidth() / 2, center.y + getHeight() / 2), "Premises");
+		drawStringAt(g2d, new Point(center.x + getWidth() / 2, center.y + getHeight() / 2), "");
 
 		drawStringAt(g2d, new Point(center.x + getWidth() / 2,
 				center.y + getHeight() / 2 + premises.get().numLines() * premises.get().getLineHeight() + Branch.VERTICAL_GAP),
