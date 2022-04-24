@@ -291,6 +291,22 @@ public class TruthTrees {
 		});
 		
 		
+		//////////////////////////////////////
+		// Branch After Button
+		//////////////////////////////////////
+
+		JMenuItem addBranchAfterButton = new JMenuItem("Add Branch After");
+
+		treeMenu.add(addBranchAfterButton);
+		addBranchAfterButton.setAccelerator(KeyStroke.getKeyStroke('B', InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+		addBranchAfterButton.addActionListener(event -> {
+			try {
+				treePanel.addBranchAfter();
+			}
+			catch(UserError er) {
+				showError(er.getMessage());
+			}
+		});
 		/////////////////////////////////////
 		// Delete Button
 		/////////////////////////////////////

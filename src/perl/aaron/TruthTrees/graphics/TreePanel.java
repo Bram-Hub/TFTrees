@@ -37,6 +37,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.event.SwingPropertyChangeSupport;
 import javax.swing.plaf.basic.BasicTextFieldUI;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
@@ -447,7 +448,6 @@ public class TreePanel extends JPanel {
 	 */
 	public void check() throws UserError {
 		verifyTerminators(root.get());
-
 		switch (checkCompletion()) {
 		case ALL_CLOSED:
 			checkBranch(premises.get());
@@ -495,6 +495,10 @@ public class TreePanel extends JPanel {
 		} catch (NoneResult e) {
 			throw new UserError("No statement is currently selected!");
 		}
+	}
+
+	private void moveCursor() {
+		editLine.setNone();
 	}
 
 	/**
@@ -858,25 +862,6 @@ public class TreePanel extends JPanel {
 		addLine(LinePlacement.AFTER);
 	}
 	
-	private void addBranchAfter(final LinePlacement placement) throws UserError {
-		try {
-			final BranchLine editLine = this.editLine.unwrap();
-			BranchLine newLine = null;
-			// for (int i = 0; i < editLine.getParent().numLines(); i++) {
-			// 	if (editLine.getParent().getLine(i) == editLine) {
-			// 		newLine = editLine.getParent().addBranch(null, placement == LinePlacement.AFTER? i + 1: i);
-			// 		break;
-			// 	}
-			// }
-			// assert newLine != null : "Failed to find editLine";
-			// makeTextFieldForLine(newLine, editLine.getParent(), false);
-			addBranch(editLine.getParent());
-			moveComponents();
-		}
-		catch(NoneResult r) {
-			throw new UserError("No line selected.");
-		}		
-	}
 	
 	private void addLine(final LinePlacement placement) throws UserError {
 		try {
@@ -1039,16 +1024,6 @@ public class TreePanel extends JPanel {
 					b.calculateWidestLine();
 					newField.setText(newStatement.toString());
 				} 
-				// else {
-				// 	newField.setBackground(BranchLine.INVALID_COLOR);
-				// 	if (!newField.getText().equals("")) {
-				// 		JOptionPane.showMessageDialog(null, "Error: Invalid logical statement", "Error",
-				// 				JOptionPane.ERROR_MESSAGE);
-				// 	} else {
-
-				// 		line.setStatement(null);
-				// 	}
-				// }
 				moveComponents();
 			}
 
@@ -1436,5 +1411,19 @@ public class TreePanel extends JPanel {
 		Point p = field.getLocation();
 		p.setLocation((p.getX()+field.getWidth()+10), (p.getY()+(field.getHeight()/2)+7));
 		drawStringAt(g2d, p, tickMark);
+	}
+
+	/**
+	 * adds a new branch from current line
+	 * 
+	 * @throws UserError
+	 */
+	public void addBranchAfter() throws UserError {
+		try {
+			addBranch(editLine.unwrap().getParent());
+		}
+		catch(NoneResult r) {
+			throw new UserError("No statement is currently selected!");
+		}
 	}
 }
