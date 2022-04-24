@@ -462,6 +462,10 @@ public class TreePanel extends JPanel {
 		}
 	}
 
+	/**
+	 * highlights all statements that are syntatically invalid with red, if 
+	 * every statement is correct, highlight all statements with green
+	 */
 	public void checkSentences() throws UserError {
 		int correct = 0;
 		for (Map.Entry<JTextField,BranchLine> entry :lineMap.entrySet()){
@@ -474,7 +478,10 @@ public class TreePanel extends JPanel {
 			} 
 		}
 		if(correct == lineMap.size()){
-			
+			for (Map.Entry<JTextField,BranchLine> entry :lineMap.entrySet()){
+				JTextField e = entry.getKey();
+				e.setBackground(BranchLine.EDIT_COLOR);
+			}
 		}
 	}
 
@@ -1146,7 +1153,7 @@ public class TreePanel extends JPanel {
 
 		drawStringAt(g2d, new Point(center.x + getWidth() / 2,
 				center.y + getHeight() / 2 + premises.get().numLines() * premises.get().getLineHeight() + Branch.VERTICAL_GAP),
-				"Decomposition");
+				"");
 
 		for (BranchLine l : reverseLineMap.keySet()){
 			if (l.decompNum != -1){

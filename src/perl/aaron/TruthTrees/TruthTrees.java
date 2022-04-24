@@ -91,28 +91,26 @@ public class TruthTrees {
 
 
 		/////////////////////////////
-		// Check Syntax Button
+		// Verify Syntax Button
 		/////////////////////////////
 
-		JMenuItem checkSyntaxButton = new JMenuItem("Check Syntax");
+		JMenuItem checkSyntaxButton = new JMenuItem("Verify Syntax");
 
 		treeMenu.add(checkSyntaxButton);
 		checkSyntaxButton.setAccelerator(KeyStroke.getKeyStroke('I', InputEvent.CTRL_DOWN_MASK));
 		checkSyntaxButton.addActionListener( event -> {
-			// String msg;
 			try {
 				treePanel.checkSentences();
-				// msg = "The tree is correct!";
 			}
 			catch(UserError userError) {
-				// msg = "The tree is invalid!\n" + userError.getMessage();
 			}
-			// showMessage(msg, "Check Tree");
 		});
 
 		////////////////////////////
 		// Verify Line Button
 		////////////////////////////
+
+
 
 		JMenuItem checkLineButton = new JMenuItem("Verify Current Line");
 
@@ -129,7 +127,7 @@ public class TruthTrees {
 			}
 			showMessage(msg, "Verify Current Line");
 		});
-
+		
 		///////////////////////////////
 		// New Button
 		/////////////////////////////
