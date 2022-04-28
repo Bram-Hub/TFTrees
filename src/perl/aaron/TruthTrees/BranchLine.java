@@ -32,6 +32,7 @@ public class BranchLine {
 	protected Set<BranchLine> selectedLines;
 	protected BranchLine decomposedFrom;
 	protected boolean isPremise;
+	protected boolean isBranch;
 	protected boolean usedForModusPonens; // Flag says if the current statement was used as premise for Modus Ponens
 	public static final Color SELECTED_COLOR = new Color(0.3f,0.9f,0.9f);
 	public static final Color DEFAULT_COLOR = Color.LIGHT_GRAY;
@@ -76,7 +77,7 @@ public class BranchLine {
 	{
 		return isPremise;
 	}
-	
+
 	public void setStatement(Statement statement)
 	{
 		this.statement = statement;

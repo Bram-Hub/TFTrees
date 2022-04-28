@@ -315,7 +315,14 @@ public class TruthTrees {
 
 		treeMenu.add(deleteButton);
 		deleteButton.setAccelerator(KeyStroke.getKeyStroke('D', InputEvent.CTRL_DOWN_MASK));
-		deleteButton.addActionListener(event -> treePanel.deleteCurrentLine());
+		deleteButton.addActionListener(event -> {
+			try {
+				treePanel.deleteCurrentLine();
+			}
+			catch(UserError er) {
+				showError(er.getMessage());
+			}
+		});
 		      
 
 		

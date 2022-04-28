@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
 
+import javax.lang.model.type.NullType;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -1052,17 +1053,6 @@ public class TreePanel extends JPanel {
 		return newLine;
 	}
 
-	// temporary
-	/**
-	 * Adds a statement to the root of the tree
-	 * 
-	 * @param s the Statement added to the tree
-	 */
-	/*
-	public void addStatement(Statement s) {
-		addStatement(root.get(), s);
-	}
-	*/
 
 	/**
 	 * Adds a closed BranchTerminator to a branch
@@ -1182,7 +1172,7 @@ public class TreePanel extends JPanel {
 				curLine.setDecomposedFrom(null);
 		int removeIndex = -1;
 		for (int i = 0; i < removedLine.getParent().numLines(); i++) {
-			if (removedLine.getParent().getLine(i) == removedLine) {
+			if (removedLine.getParent().getLine(i).equals(removedLine)) {
 				removeIndex = i;
 				break;
 			}
@@ -1206,13 +1196,54 @@ public class TreePanel extends JPanel {
 	/**
 	 * Deletes the currently selected line
 	 */
-	public void deleteCurrentLine() {
-		editLine.if_some(editLine -> {
-			removeLine(editLine);
-			deselectCurrentLine();
-			moveComponents();
-			repaint();
-		});
+	public void deleteCurrentLine() throws UserError {
+		try {
+			Branch b = editLine.unwrap().getParent();
+			if(b.numLines() == 2 && b.getLine(0).getStatement() == null && b.getLine(1).getStatement() != null && b.getLine(1).equals(editLine.unwrap())) {
+				removeLine(b.getLine(0));
+				removeLine(editLine.unwrap());;
+				deselectCurrentLine();
+				moveComponents();
+				repaint();
+			}
+			else if(editLine.unwrap().equals(editLine.unwrap().getParent().getLine(0))){
+				for (int i = 1; i < b.numLines(); i++) {
+					if(b.getLine(i).getStatement() != null) {
+						throw new UserError("Root Statement cannot be deleted if the branch contains non empty lines");
+					}
+				}
+				if(editLine.unwrap().isPremise() && b.numLines()==1){
+					throw new UserError("Tree must contain at least one Premise");
+				}
+				removeLine(b.getLine(b.numLines()-1));
+
+				if(b.numLines()==0) deselectCurrentLine();
+				moveComponents();
+				repaint();
+			}else{
+				boolean allNull = true;
+				int num_statements = 0;
+				for (int i = 0; i < b.numLines(); i++) {
+					if(b.getLine(i).getStatement() != null) allNull = false;
+				}
+				// if()
+				for (int i = 0; i < b.numLines(); i++) {
+					if(b.getLine(i).getStatement() != null) num_statements++;
+					// if(b.getLine(i).getStatement() != null || (b.getLine(i).equals(editLine.unwrap()) && b.getLine(i).getStatement() == null)) {
+					// }
+				}
+				// System.out.println(removable);
+				System.out.println(num_statements);
+				if(num_statements == 1 && (b.getLines().size()) != 1 && editLine.unwrap().getStatement() != null) throw new UserError("This line cannot be removed");
+				removeLine(editLine.unwrap());
+				deselectCurrentLine();
+				moveComponents();
+				repaint();
+			}
+		}
+		catch(NoneResult r) {
+			throw new UserError("No Line is currently Selected.");
+		}
 	}
 
 	/**
@@ -1224,7 +1255,7 @@ public class TreePanel extends JPanel {
 	private void deleteBranch(Branch b) {
 		for (Branch curChild : b.getBranches())
 			deleteBranch(curChild);
-		for (int i = 0; i < b.numLines(); i++) {
+		for (int i = b.numLines() - 1; i >= 0; i--) {
 			removeLine(b.getLine(i));
 		}
 		remove(addBranchMap.get(b));
@@ -1241,6 +1272,7 @@ public class TreePanel extends JPanel {
 		{
 			b.getRoot().getDecomposedFrom().getSelectedBranches().remove(b.getRoot());
 		}
+		
 	}
 
 	/**
@@ -1257,7 +1289,7 @@ public class TreePanel extends JPanel {
 			repaint();
 		}
 		catch(NoneResult r) {
-			throw new UserError("None line selected.");
+			throw new UserError("No statement is currently selected!");
 		}
 	}
 
