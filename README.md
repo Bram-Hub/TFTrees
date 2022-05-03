@@ -19,6 +19,9 @@ Jonathan Cheng
 Kevin Boyle
 Manusri Viswanathan
 
+2022:
+Jonathan Li
+
 ## About
 A formal proof interface for creating truth trees
 
@@ -38,11 +41,15 @@ CTRL + L for verify line
 
 CTRL + T for verify tree
 
+CTRL + I for verify tree for syntax
+
 CTRL + SHIFT + Click for add modus ponens support step
 
 CTRL + A for add line after
 
 CTRL + B for add line before
+
+CTRL + SHIFT + B for add new branch
 
 CTRL + D for delete current line
 
