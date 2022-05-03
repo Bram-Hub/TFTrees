@@ -1114,11 +1114,11 @@ public class TreePanel extends JPanel {
 		g2d.fillRect(0, 0, getWidth(), getHeight());
 		g2d.setColor(new Color(0.0f, 0.0f, 0.0f));
 		g2d.setStroke(new BasicStroke(4.0f));
-		drawStringAt(g2d, new Point(center.x + getWidth() / 2, center.y + getHeight() / 2), "");
+		drawStringAt(g2d, new Point(center.x + getWidth() / 2, center.y + getHeight() / 2), "Premises");
 
 		drawStringAt(g2d, new Point(center.x + getWidth() / 2,
 				center.y + getHeight() / 2 + premises.get().numLines() * premises.get().getLineHeight() + Branch.VERTICAL_GAP),
-				"");
+				"Decomposition");
 
 		for (BranchLine l : reverseLineMap.keySet()){
 			if (l.decompNum != -1){
