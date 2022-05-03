@@ -89,9 +89,28 @@ public class TruthTrees {
 			showMessage(msg, "Check Tree");
 		});
 
+
+		/////////////////////////////
+		// Verify Syntax Button
+		/////////////////////////////
+
+		JMenuItem checkSyntaxButton = new JMenuItem("Verify Syntax");
+
+		treeMenu.add(checkSyntaxButton);
+		checkSyntaxButton.setAccelerator(KeyStroke.getKeyStroke('I', InputEvent.CTRL_DOWN_MASK));
+		checkSyntaxButton.addActionListener( event -> {
+			try {
+				treePanel.checkSentences();
+			}
+			catch(UserError userError) {
+			}
+		});
+
 		////////////////////////////
 		// Verify Line Button
 		////////////////////////////
+
+
 
 		JMenuItem checkLineButton = new JMenuItem("Verify Current Line");
 
@@ -108,7 +127,7 @@ public class TruthTrees {
 			}
 			showMessage(msg, "Verify Current Line");
 		});
-
+		
 		///////////////////////////////
 		// New Button
 		/////////////////////////////
@@ -201,6 +220,7 @@ public class TruthTrees {
 				showError(userError.getMessage());
 			}
 		});
+
 		
 		/////////////////////////////////////
 		// Tick Button
@@ -270,6 +290,23 @@ public class TruthTrees {
 			}
 		});
 		
+		
+		//////////////////////////////////////
+		// Branch After Button
+		//////////////////////////////////////
+
+		JMenuItem addBranchAfterButton = new JMenuItem("Add Branch After");
+
+		treeMenu.add(addBranchAfterButton);
+		addBranchAfterButton.setAccelerator(KeyStroke.getKeyStroke('B', InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+		addBranchAfterButton.addActionListener(event -> {
+			try {
+				treePanel.addBranchAfter();
+			}
+			catch(UserError er) {
+				showError(er.getMessage());
+			}
+		});
 		/////////////////////////////////////
 		// Delete Button
 		/////////////////////////////////////
@@ -278,7 +315,16 @@ public class TruthTrees {
 
 		treeMenu.add(deleteButton);
 		deleteButton.setAccelerator(KeyStroke.getKeyStroke('D', InputEvent.CTRL_DOWN_MASK));
-		deleteButton.addActionListener(event -> treePanel.deleteCurrentLine());
+		deleteButton.addActionListener(event -> {
+			try {
+				treePanel.deleteCurrentLine();
+			}
+			catch(UserError er) {
+				showError(er.getMessage());
+			}
+		});
+		      
+
 		
 		//////////////////////////////////////
 		// Delete Branch Button

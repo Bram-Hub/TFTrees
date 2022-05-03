@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
 
+import javax.lang.model.type.NullType;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -37,6 +38,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.event.SwingPropertyChangeSupport;
 import javax.swing.plaf.basic.BasicTextFieldUI;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
@@ -447,7 +449,6 @@ public class TreePanel extends JPanel {
 	 */
 	public void check() throws UserError {
 		verifyTerminators(root.get());
-
 		switch (checkCompletion()) {
 		case ALL_CLOSED:
 			checkBranch(premises.get());
@@ -463,6 +464,29 @@ public class TreePanel extends JPanel {
 	}
 
 	/**
+	 * highlights all statements that are syntatically invalid with red, if 
+	 * every statement is correct, highlight all statements with green
+	 */
+	public void checkSentences() throws UserError {
+		int correct = 0;
+		for (Map.Entry<JTextField,BranchLine> entry :lineMap.entrySet()){
+			JTextField e = entry.getKey();
+			Statement newStatement = ExpressionParser.parseExpression(entry.getValue().toString());
+			if(newStatement == null){
+				e.setBackground(BranchLine.INVALID_COLOR);
+			} else {
+				correct ++;
+			} 
+		}
+		if(correct == lineMap.size()){
+			for (Map.Entry<JTextField,BranchLine> entry :lineMap.entrySet()){
+				JTextField e = entry.getKey();
+				e.setBackground(BranchLine.EDIT_COLOR);
+			}
+		}
+	}
+
+	/**
 	 * Checks the selected line.
 	 *
 	 */
@@ -472,6 +496,10 @@ public class TreePanel extends JPanel {
 		} catch (NoneResult e) {
 			throw new UserError("No statement is currently selected!");
 		}
+	}
+
+	private void moveCursor() {
+		editLine.setNone();
 	}
 
 	/**
@@ -835,6 +863,7 @@ public class TreePanel extends JPanel {
 		addLine(LinePlacement.AFTER);
 	}
 	
+	
 	private void addLine(final LinePlacement placement) throws UserError {
 		try {
 			final BranchLine editLine = this.editLine.unwrap();
@@ -995,19 +1024,7 @@ public class TreePanel extends JPanel {
 					line.setStatement(newStatement);
 					b.calculateWidestLine();
 					newField.setText(newStatement.toString());
-				} else {
-					if (!newField.getText().equals("")) {
-						if (line.getStatement() != null)
-							newField.setText(line.toString());
-						else
-							newField.setText("");
-						JOptionPane.showMessageDialog(null, "Error: Invalid logical statement", "Error",
-								JOptionPane.ERROR_MESSAGE);
-					} else {
-
-						line.setStatement(null);
-					}
-				}
+				} 
 				moveComponents();
 			}
 
@@ -1036,17 +1053,6 @@ public class TreePanel extends JPanel {
 		return newLine;
 	}
 
-	// temporary
-	/**
-	 * Adds a statement to the root of the tree
-	 * 
-	 * @param s the Statement added to the tree
-	 */
-	/*
-	public void addStatement(Statement s) {
-		addStatement(root.get(), s);
-	}
-	*/
 
 	/**
 	 * Adds a closed BranchTerminator to a branch
@@ -1166,7 +1172,7 @@ public class TreePanel extends JPanel {
 				curLine.setDecomposedFrom(null);
 		int removeIndex = -1;
 		for (int i = 0; i < removedLine.getParent().numLines(); i++) {
-			if (removedLine.getParent().getLine(i) == removedLine) {
+			if (removedLine.getParent().getLine(i).equals(removedLine)) {
 				removeIndex = i;
 				break;
 			}
@@ -1190,13 +1196,54 @@ public class TreePanel extends JPanel {
 	/**
 	 * Deletes the currently selected line
 	 */
-	public void deleteCurrentLine() {
-		editLine.if_some(editLine -> {
-			removeLine(editLine);
-			deselectCurrentLine();
-			moveComponents();
-			repaint();
-		});
+	public void deleteCurrentLine() throws UserError {
+		try {
+			Branch b = editLine.unwrap().getParent();
+			if(b.numLines() == 2 && b.getLine(0).getStatement() == null && b.getLine(1).getStatement() != null && b.getLine(1).equals(editLine.unwrap())) {
+				removeLine(b.getLine(0));
+				removeLine(editLine.unwrap());;
+				deselectCurrentLine();
+				moveComponents();
+				repaint();
+			}
+			else if(editLine.unwrap().equals(editLine.unwrap().getParent().getLine(0))){
+				for (int i = 1; i < b.numLines(); i++) {
+					if(b.getLine(i).getStatement() != null) {
+						throw new UserError("Root Statement cannot be deleted if the branch contains non empty lines");
+					}
+				}
+				if(editLine.unwrap().isPremise() && b.numLines()==1){
+					throw new UserError("Tree must contain at least one Premise");
+				}
+				removeLine(b.getLine(b.numLines()-1));
+
+				if(b.numLines()==0) deselectCurrentLine();
+				moveComponents();
+				repaint();
+			}else{
+				boolean allNull = true;
+				int num_statements = 0;
+				for (int i = 0; i < b.numLines(); i++) {
+					if(b.getLine(i).getStatement() != null) allNull = false;
+				}
+				// if()
+				for (int i = 0; i < b.numLines(); i++) {
+					if(b.getLine(i).getStatement() != null) num_statements++;
+					// if(b.getLine(i).getStatement() != null || (b.getLine(i).equals(editLine.unwrap()) && b.getLine(i).getStatement() == null)) {
+					// }
+				}
+				// System.out.println(removable);
+				System.out.println(num_statements);
+				if(num_statements == 1 && (b.getLines().size()) != 1 && editLine.unwrap().getStatement() != null) throw new UserError("This line cannot be removed");
+				removeLine(editLine.unwrap());
+				deselectCurrentLine();
+				moveComponents();
+				repaint();
+			}
+		}
+		catch(NoneResult r) {
+			throw new UserError("No Line is currently Selected.");
+		}
 	}
 
 	/**
@@ -1208,7 +1255,7 @@ public class TreePanel extends JPanel {
 	private void deleteBranch(Branch b) {
 		for (Branch curChild : b.getBranches())
 			deleteBranch(curChild);
-		for (int i = 0; i < b.numLines(); i++) {
+		for (int i = b.numLines() - 1; i >= 0; i--) {
 			removeLine(b.getLine(i));
 		}
 		remove(addBranchMap.get(b));
@@ -1225,6 +1272,7 @@ public class TreePanel extends JPanel {
 		{
 			b.getRoot().getDecomposedFrom().getSelectedBranches().remove(b.getRoot());
 		}
+		
 	}
 
 	/**
@@ -1241,7 +1289,7 @@ public class TreePanel extends JPanel {
 			repaint();
 		}
 		catch(NoneResult r) {
-			throw new UserError("None line selected.");
+			throw new UserError("No statement is currently selected!");
 		}
 	}
 
@@ -1395,5 +1443,19 @@ public class TreePanel extends JPanel {
 		Point p = field.getLocation();
 		p.setLocation((p.getX()+field.getWidth()+10), (p.getY()+(field.getHeight()/2)+7));
 		drawStringAt(g2d, p, tickMark);
+	}
+
+	/**
+	 * adds a new branch from current line
+	 * 
+	 * @throws UserError
+	 */
+	public void addBranchAfter() throws UserError {
+		try {
+			addBranch(editLine.unwrap().getParent());
+		}
+		catch(NoneResult r) {
+			throw new UserError("No statement is currently selected!");
+		}
 	}
 }
